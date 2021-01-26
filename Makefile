@@ -4,6 +4,8 @@ OBJDIR = objs
 INCLUDES = \
 -Isrc \
 -Isrc/drivers \
+-Isrc/mavlink/autogen \
+-Isrc/mavlink/autogen/common \
 
 SRCS = \
 src/main.c \
