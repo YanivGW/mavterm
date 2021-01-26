@@ -1,9 +1,13 @@
 CC = gcc
 CFLAGS = -Wall -g
 OBJDIR = objs
-INCLUDES = -Isrc \
+INCLUDES = \
+-Isrc \
+-Isrc/drivers \
 
-SRCS = src/main.c \
+SRCS = \
+src/main.c \
+src/drivers/uart_mock.c \
 
 OBJS = $(SRCS:.c=.o)
 
