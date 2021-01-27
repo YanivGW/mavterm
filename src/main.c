@@ -1,31 +1,66 @@
 #include <drivers.h>
+#include <mavlink_terminal.h>
 #include <proj_assert.h>
+#include <project_messages.h>
 #include <stdint.h>
 #include <stdio.h>
 
-#define MAX_MAVLINK_MSG_SIZE_BYTES 256
-uint8_t buf[MAX_MAVLINK_MSG_SIZE_BYTES] = {0};
+MAVLINK_TERMINAL_GENERATE_OBJECT(terminal, UART);
 
-static void uart_cb(uint32_t event)
+void terminal_cb(mavlink_message_t *p_msg, void *arg)
 {
-    proj_assert(event == ARM_USART_EVENT_RECEIVE_COMPLETE);
-    printf("UART callback\n");
+    printf("MAVLink message received! Len = %d\n", p_msg->len);
+    switch (p_msg->msgid)
+    {
+    // Option #1 - Parsing whole command into struct
+    case MAVLINK_MSG_ID_COMMAND_INT:
+    {
+        mavlink_command_int_t cmd;
+        mavlink_msg_command_int_decode(p_msg, &cmd);
+        switch (cmd.command)
+        {
+        case MAV_CMD_DO_GRIPPER:
+        {
+            uint32_t instance = (uint32_t)cmd.param1;
+            GRIPPER_ACTIONS action = (GRIPPER_ACTIONS)cmd.param2;
+            // do whatever needed..
+            break;
+        }
+        default:
+        {
+            break;
+        }
+        }
+    }
+    // Option #2 - Parsing field by field
+    case MAVLINK_MSG_ID_COMMAND_LONG:
+    {
+        switch (mavlink_msg_command_long_get_command(p_msg))
+        {
+        case MAV_CMD_DO_GRIPPER:
+        {
+            uint32_t instance = (uint32_t)mavlink_msg_command_long_get_param1(p_msg);
+            GRIPPER_ACTIONS action = (GRIPPER_ACTIONS)mavlink_msg_command_long_get_param2(p_msg);
+            // do whatever needed..
+            break;
+        }
+        default:
+        {
+            break;
+        }
+        }
+    }
+    default:
+    {
+        break;
+    }
+    }
 }
 
 int main()
 {
-    printf("C is so fun!\n");
-
-    int32_t res = UART->Initialize(uart_cb);
-    proj_assert(res == ARM_DRIVER_OK);
-
-    size_t idx = 0;
-    while (res == ARM_DRIVER_OK && idx < sizeof(buf))
-    {
-        res = UART->Receive(&buf[idx++], 1);
-    }
-
-    printf("Receive complete: %s\n", buf);
+    mavlink_terminal_initialize(&terminal, terminal_cb, NULL);
+    mavlink_terminal_listen(&terminal);
 
     return 0;
 }

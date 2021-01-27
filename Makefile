@@ -4,12 +4,14 @@ OBJDIR = objs
 INCLUDES = \
 -Isrc \
 -Isrc/drivers \
+-Isrc/mavlink \
 -Isrc/mavlink/autogen \
 -Isrc/mavlink/autogen/common \
 
 SRCS = \
 src/main.c \
 src/drivers/uart_mock.c \
+src/mavlink/mavlink_terminal.c \
 
 OBJS = $(SRCS:.c=.o)
 

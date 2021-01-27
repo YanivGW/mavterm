@@ -4,10 +4,12 @@
 #include <stdio.h>
 
 static int32_t initialize(ARM_USART_SignalEvent_t cb_event);
+static int32_t power_control(ARM_POWER_STATE state);
 static int32_t receive(void *data, uint32_t num);
 
 ARM_DRIVER_USART uart_mock = {
     .Initialize = initialize,
+    .PowerControl = power_control,
     .Receive = receive,
 };
 
@@ -19,7 +21,7 @@ typedef struct
 } resources_t;
 
 static resources_t resources = {
-    .filename = "data/uart_input.bin",
+    .filename = "data/double_message.bin",
 };
 
 static int32_t initialize(ARM_USART_SignalEvent_t cb_event)
@@ -31,6 +33,12 @@ static int32_t initialize(ARM_USART_SignalEvent_t cb_event)
     this->fptr = fopen(this->filename, "r");
     proj_assert(this->fptr != NULL);
 
+    return ARM_DRIVER_OK;
+}
+
+static int32_t power_control(ARM_POWER_STATE state)
+{
+    (void)state;
     return ARM_DRIVER_OK;
 }
 
